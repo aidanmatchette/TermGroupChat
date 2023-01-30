@@ -25,6 +25,9 @@ Commands:
 
 
 #topic <--- chat room / group chat for certain topic
-join <topic name>
-msg #topic body...
+join #<topic name>
+send: msg #topic body...
+receive: msg #topic:<login> body...
+leave #<topic name>
+
 

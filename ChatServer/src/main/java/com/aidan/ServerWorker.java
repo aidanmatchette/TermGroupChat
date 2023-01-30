@@ -51,6 +51,10 @@ public class ServerWorker extends Thread {
                     handleMessage(tokensMsg);
                 } else if ("join".equalsIgnoreCase(cmd)) {
                     handleJoin(tokens);
+                } else if ("topics".equalsIgnoreCase(cmd)) {
+                    handleTopics(tokens);
+                } else if ("leave".equalsIgnoreCase(cmd)) {
+                    handleLeave(tokens);
                 } else {
                     String msg = "unknown " + cmd + "\n";
                     outputStream.write(msg.getBytes());
@@ -59,6 +63,25 @@ public class ServerWorker extends Thread {
 
         }
         clientSocket.close();
+    }
+
+    private void handleLeave(String[] tokens) {
+        if (tokens.length > 1) {
+            String topic = tokens[1];
+            topicSet.remove(topic);
+        }
+    }
+
+    private void handleTopics(String[] tokens) throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        for (String topic: topicSet) {
+            sb.append(" " + topic);
+        }
+        List<ServerWorker> workerList = server.getWorkerList();
+        for (ServerWorker worker: workerList) {
+            worker.send(sb.toString());
+        }
     }
 
     public boolean isMemberOfTopic(String topic) {
@@ -84,7 +107,7 @@ public class ServerWorker extends Thread {
         for (ServerWorker worker: workerList) {
             if (isTopic) {
                 if (worker.isMemberOfTopic(sendTo)) {
-                    String outMsg = "msg " + sendTo + " " + msgContent + "\n";
+                    String outMsg = String.format("msg in %s: from `%s`\n%s", sendTo, login, msgContent);
                     worker.send(outMsg);
                 }
 
