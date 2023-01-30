@@ -18,3 +18,13 @@ Commands:
 
     login <user> <password>
     logoff
+
+    msg <usr> body.. 
+    guest:-> "msg jim Hello World"
+    jim:-> "guest Hello World"
+
+
+#topic <--- chat room / group chat for certain topic
+join <topic name>
+msg #topic body...
+
