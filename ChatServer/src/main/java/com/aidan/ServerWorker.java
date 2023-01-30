@@ -4,7 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ServerWorker extends Thread {
 
@@ -12,6 +14,7 @@ public class ServerWorker extends Thread {
     private final Server server;
     private String login = null;
     private OutputStream outputStream;
+    private Set<String> topicSet = new HashSet<>();
 
     public ServerWorker(Server server, Socket clientSocket) {
         this.server = server;
@@ -58,22 +61,38 @@ public class ServerWorker extends Thread {
         clientSocket.close();
     }
 
+    public boolean isMemberOfTopic(String topic) {
+        return topicSet.contains(topic);
+    }
+
     private void handleJoin(String[] tokens) {
         if (tokens.length > 1) {
             String topic = tokens[1];
+            topicSet.add(topic);
         }
     }
 
-    //format: "msg" "login" content...
+    //format: "msg" "login" body...
+    //format: "msg" "#topic" body...
     private void handleMessage(String[] tokens) throws IOException {
         String sendTo = tokens[1];
         String msgContent = tokens[2];
 
+        boolean isTopic = sendTo.charAt(0) == '#';
+
         List<ServerWorker> workerList = server.getWorkerList();
         for (ServerWorker worker: workerList) {
-            if (sendTo.equalsIgnoreCase(worker.getLogin())) {
-                String outMsg = "msg " + login +" " + msgContent + "\n";
-                worker.send(outMsg);
+            if (isTopic) {
+                if (worker.isMemberOfTopic(sendTo)) {
+                    String outMsg = "msg " + sendTo + " " + msgContent + "\n";
+                    worker.send(outMsg);
+                }
+
+            } else {
+                if (sendTo.equalsIgnoreCase(worker.getLogin())) {
+                    String outMsg = "msg " + login +" " + msgContent + "\n";
+                    worker.send(outMsg);
+                }
             }
         }
     }
