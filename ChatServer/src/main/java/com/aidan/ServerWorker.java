@@ -54,6 +54,7 @@ public class ServerWorker extends Thread {
     }
 
     private void handleLogoff() throws IOException{
+        server.removeWorker(this);
         String logOffMsg = String.format("%s has logged off.", this.login);
         List<ServerWorker> workerList = server.getWorkerList();
 
@@ -68,7 +69,6 @@ public class ServerWorker extends Thread {
     public String getLogin() {
         return login;
     }
-
 
     private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException {
         if (tokens. length == 3) {

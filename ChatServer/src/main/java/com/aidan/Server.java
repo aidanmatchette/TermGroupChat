@@ -14,8 +14,13 @@ public class Server extends Thread {
     public Server(int serverPort) {
         this.serverPort = serverPort;
     }
+
     public List<ServerWorker> getWorkerList() {
         return workerList;
+    }
+
+    public void removeWorker(ServerWorker serverWorker) {
+        workerList.remove(serverWorker);
     }
 
     @Override
